@@ -82,4 +82,5 @@ Here's the currently supported options
         frequency at which usage data is refreshed (default 30m0s)
 ```
 
-A docker image will be released soon.
+The exporter reads the auth token either from the -github-auth-token flag or the `GITHUB_TOKEN` environment variable.
+
