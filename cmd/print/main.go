@@ -3,15 +3,20 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
+	"os/signal"
 	"sort"
+	"syscall"
 	"time"
 
-	"github.com/google/go-github/v57/github"
 	"github.com/jlevesy/workflows-exporter/actions"
+	"github.com/jlevesy/workflows-exporter/pkg/github"
 	"go.uber.org/zap"
 )
 
-func main() {
+func main() { os.Exit(run()) }
+
+func run() int {
 	var (
 		githubAuthToken string
 		organization    string
@@ -28,31 +33,36 @@ func main() {
 	logger := zap.Must(zap.NewDevelopment())
 
 	if organization == "" {
-		logger.Fatal("You must provide an organization, exiting")
+		logger.Error("You must provide an organization, exiting")
+		return 1
 	}
 
-	var (
-		ctx = context.Background()
-		gh  = github.NewClient(nil).WithAuthToken(
-			githubAuthToken,
-		)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
 
-		fetcher = actions.NewOrgUsageFetcher(
-			concurencyLimit,
-			maxLastPushed,
-			organization,
-			gh,
-			logger,
-		)
+	gh, err := github.NewClient(ctx, githubAuthToken, logger)
+	if err != nil {
+		logger.Error("Could not setup github client", zap.Error(err))
+		return 1
+	}
+
+	fetcher := actions.NewOrgUsageFetcher(
+		concurencyLimit,
+		maxLastPushed,
+		organization,
+		gh,
+		logger,
 	)
 
 	usage, err := fetcher.Fetch(ctx)
 	if err != nil {
-		logger.Fatal(
+		logger.Error(
 			"Unable to retrieve usage information",
 			zap.String("org", organization),
 			zap.Error(err),
 		)
+
+		return 1
 	}
 
 	sort.Slice(usage, func(i, j int) bool {
@@ -69,4 +79,6 @@ func main() {
 			zap.Any("billable_time", workflowUsage.BillableTime),
 		)
 	}
+
+	return 0
 }

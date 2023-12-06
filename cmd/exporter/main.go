@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/google/go-github/v57/github"
 	"github.com/jlevesy/workflows-exporter/actions"
+	"github.com/jlevesy/workflows-exporter/pkg/github"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"go.uber.org/zap"
 
@@ -14,7 +18,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func main() {
+func main() { os.Exit(run()) }
+
+func run() int {
 	var (
 		listenAddress   string
 		githubAuthToken string
@@ -43,9 +49,14 @@ func main() {
 		zap.String("listen_address", listenAddress),
 	)
 
-	gh := github.NewClient(nil).WithAuthToken(
-		githubAuthToken,
-	)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	gh, err := github.NewClient(ctx, githubAuthToken, logger)
+	if err != nil {
+		logger.Error("Could not setup github client", zap.Error(err))
+		return 1
+	}
 
 	fetcher := actions.NewOrgUsageFetcher(
 		concurencyLimit,
@@ -74,5 +85,8 @@ func main() {
 			"Could not listen over HTTP",
 			zap.Error(err),
 		)
+		return 1
 	}
+
+	return 0
 }
