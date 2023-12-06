@@ -68,18 +68,20 @@ go run ./cmd/exporter -help
 Here's the currently supported options
 
 ```
-  -concurency int
-        How many request are allowed in parallel (default 100)
-  -github-auth-token string
-        github auth token
-  -listen-address string
-        The address to listen on for HTTP requests. (default ":8080")
-  -max-last-pushed duration
-        How many time since the last push to consider a repo inactive (default 840h0m0s)
-  -organization string
-        organization
-  -refresh-period duration
-        frequency at which usage data is refreshed (default 30m0s)
+-concurency int
+    How many requests are allowed in parallel (default 100)
+-github-auth-token string
+    GitHub auth token
+-listen-address string
+    The address to listen on for HTTP requests. (default ":8080")
+-max-last-pushed duration
+    How many time since the last push to consider a repo inactive (default 840h0m0s)
+-organization string
+    Organization to monitor
+-refresh-period duration
+    Frequency at which usage data is refreshed (default 30m0s)
+-shutdown-delay duration
+    Graceful shutdown delay (default 15s)
 ```
 
 The exporter reads the auth token either from the -github-auth-token flag or the `GITHUB_TOKEN` environment variable.
