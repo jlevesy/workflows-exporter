@@ -11,7 +11,7 @@ To achieve this, it does the following tradeoffs:
 
 ## Exported metrics
 
-### Billable time
+### Billable Time
 
 ```
 # HELP github_actions_workflow_billable_time_seconds Billable time for a repo, per workflow and platform
@@ -30,6 +30,27 @@ github_actions_workflow_billable_time_seconds{owner="totocorp",platform="UBUNTU"
 github_actions_workflow_billable_time_seconds{owner="totocorp",platform="UBUNTU",repo="repo-C",workflow="test",workflow_id="2"} 15
 ```
 
+### Last Refresh Timestamp
+
+Last timestamp in seconds where the exported managed to refresh the data. Usefull for detecting stale data.
+
+```
+# HELP github_actions_workflow_last_refresh_timestamp_seconds Last timestamp in seconds since epoch of the last dataset refresh
+# TYPE github_actions_workflow_last_refresh_timestamp_seconds gauge
+github_actions_workflow_last_refresh_timestamp_seconds 1.697328e+09
+```
+
+### Last Refresh Duration
+
+How much time it took to refresh the whole dataset.
+
+```
+# HELP github_actions_workflow_last_refresh_duration_seconds Last refresh duration in seconds
+# TYPE github_actions_workflow_last_refresh_duration_seconds gauge
+github_actions_workflow_last_refresh_duration_seconds 1
+```
+
+
 ## How to use the exporter?
 
 Run the exporter
@@ -42,6 +63,23 @@ All available options can be found using
 
 ```
 go run ./cmd/exporter -help
+```
+
+Here's the currently supported options
+
+```
+  -concurency int
+        How many request are allowed in parallel (default 100)
+  -github-auth-token string
+        github auth token
+  -listen-address string
+        The address to listen on for HTTP requests. (default ":8080")
+  -max-last-pushed duration
+        How many time since the last push to consider a repo inactive (default 840h0m0s)
+  -organization string
+        organization
+  -refresh-period duration
+        frequency at which usage data is refreshed (default 30m0s)
 ```
 
 A docker image will be released soon.
