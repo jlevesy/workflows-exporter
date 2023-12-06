@@ -32,9 +32,9 @@ func run() int {
 
 	flag.StringVar(&githubAuthToken, "github-auth-token", "", "github auth token")
 	flag.StringVar(&organization, "organization", "", "organization")
-	flag.IntVar(&concurencyLimit, "concurency", 100, "concurency limit")
-	flag.DurationVar(&maxLastPushed, "max-last-pushed", 30*24*time.Hour, "How much time since the last push to consider a repo inactive")
-	flag.DurationVar(&refreshPeriod, "refresh-period", 15*time.Minute, "frequency at which usage data is refreshed")
+	flag.IntVar(&concurencyLimit, "concurency", 100, "How many request are allowed in parallel")
+	flag.DurationVar(&maxLastPushed, "max-last-pushed", 35*24*time.Hour, "How many time since the last push to consider a repo inactive")
+	flag.DurationVar(&refreshPeriod, "refresh-period", 30*time.Minute, "frequency at which usage data is refreshed")
 	flag.StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
 	flag.Parse()
 

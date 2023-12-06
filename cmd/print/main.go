@@ -24,9 +24,9 @@ func run() int {
 		maxLastPushed   time.Duration
 	)
 
-	flag.StringVar(&githubAuthToken, "github-auth-token", "", "github auth token")
+	flag.StringVar(&githubAuthToken, "github-auth-token", "", "GitHub auth token")
 	flag.StringVar(&organization, "organization", "", "organization")
-	flag.IntVar(&concurencyLimit, "concurency", 100, "concurency limit")
+	flag.IntVar(&concurencyLimit, "concurency", 100, "How many request are allowed in parallel")
 	flag.DurationVar(&maxLastPushed, "max-last-pushed", 30*24*time.Hour, "How many time since the last push to consider a repo inactive")
 	flag.Parse()
 
