@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/google/go-github/v57/github"
 	"github.com/jlevesy/workflows-exporter/actions"
+	"github.com/jlevesy/workflows-exporter/pkg/github"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"go.uber.org/zap"
 
@@ -14,7 +18,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func main() {
+func main() { os.Exit(run()) }
+
+func run() int {
 	var (
 		listenAddress   string
 		githubAuthToken string
@@ -26,9 +32,9 @@ func main() {
 
 	flag.StringVar(&githubAuthToken, "github-auth-token", "", "github auth token")
 	flag.StringVar(&organization, "organization", "", "organization")
-	flag.IntVar(&concurencyLimit, "concurency", 100, "concurency limit")
-	flag.DurationVar(&maxLastPushed, "max-last-pushed", 30*24*time.Hour, "How much time since the last push to consider a repo inactive")
-	flag.DurationVar(&refreshPeriod, "refresh-period", 15*time.Minute, "frequency at which usage data is refreshed")
+	flag.IntVar(&concurencyLimit, "concurency", 100, "How many request are allowed in parallel")
+	flag.DurationVar(&maxLastPushed, "max-last-pushed", 35*24*time.Hour, "How many time since the last push to consider a repo inactive")
+	flag.DurationVar(&refreshPeriod, "refresh-period", 30*time.Minute, "frequency at which usage data is refreshed")
 	flag.StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
 	flag.Parse()
 
@@ -43,9 +49,14 @@ func main() {
 		zap.String("listen_address", listenAddress),
 	)
 
-	gh := github.NewClient(nil).WithAuthToken(
-		githubAuthToken,
-	)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	gh, err := github.NewClient(ctx, githubAuthToken, logger)
+	if err != nil {
+		logger.Error("Could not setup github client", zap.Error(err))
+		return 1
+	}
 
 	fetcher := actions.NewOrgUsageFetcher(
 		concurencyLimit,
@@ -74,5 +85,8 @@ func main() {
 			"Could not listen over HTTP",
 			zap.Error(err),
 		)
+		return 1
 	}
+
+	return 0
 }

@@ -1,10 +1,13 @@
 # Workflows-Exporter
 
 This exporter hits the Github API to collect workflow billable time for a single org.
-It is explicitely designed to only focus on workflow billabe time for now, in an attempt to tackle cases where the org has a large amount (~1000) of repositories.
+It is explicitely designed to only focus on workflow billable time for now, in an attempt to tackle cases where the organization has a large amount (~1000) of repositories.
 
-It works in best effort mode and tries to refresh the data according to the ongoing API ratelimits.
-It serves the latest fetched data.
+To achieve this, it does the following tradeoffs:
+
+- It only accounts for repositories being active in the last x days (default is 35 days)
+- It works in best effort mode and tries to refresh the data every x minutes (default is 30 minutes)
+- It serves the last retrieved data
 
 ## Exported metrics
 
