@@ -31,12 +31,12 @@ func run() int {
 		shutdownDelay   time.Duration
 	)
 
-	flag.StringVar(&githubAuthToken, "github-auth-token", "", "github auth token")
-	flag.StringVar(&organization, "organization", "", "organization")
-	flag.IntVar(&concurencyLimit, "concurency", 100, "How many request are allowed in parallel")
+	flag.StringVar(&githubAuthToken, "github-auth-token", "", "GitHub auth token")
+	flag.StringVar(&organization, "organization", "", "Organization to monitor")
+	flag.IntVar(&concurencyLimit, "concurency", 100, "How many requests are allowed in parallel")
 	flag.DurationVar(&maxLastPushed, "max-last-pushed", 35*24*time.Hour, "How many time since the last push to consider a repo inactive")
-	flag.DurationVar(&refreshPeriod, "refresh-period", 30*time.Minute, "frequency at which usage data is refreshed")
-	flag.DurationVar(&shutdownDelay, "shutdown-delay", 15*time.Second, "graceful shutdown delay")
+	flag.DurationVar(&refreshPeriod, "refresh-period", 30*time.Minute, "Frequency at which usage data is refreshed")
+	flag.DurationVar(&shutdownDelay, "shutdown-delay", 15*time.Second, "Graceful shutdown delay")
 	flag.StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
 	flag.Parse()
 
