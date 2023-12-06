@@ -49,6 +49,10 @@ func run() int {
 		zap.String("listen_address", listenAddress),
 	)
 
+	if githubAuthToken == "" {
+		githubAuthToken = os.Getenv("GITHUB_TOKEN")
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
