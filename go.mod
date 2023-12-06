@@ -7,7 +7,7 @@ require (
 	github.com/google/go-github/v57 v57.0.0
 	github.com/migueleliasweb/go-github-mock v0.0.22
 	github.com/prometheus/client_golang v1.17.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 	golang.org/x/oauth2 v0.15.0
 	golang.org/x/sync v0.5.0
