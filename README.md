@@ -30,6 +30,16 @@ github_actions_workflow_billable_time_seconds{owner="totocorp",platform="UBUNTU"
 github_actions_workflow_billable_time_seconds{owner="totocorp",platform="UBUNTU",repo="repo-C",workflow="test",workflow_id="2"} 15
 ```
 
+### Active Repositories
+
+How many repositories under the organization are considered active. Depends on the `-max-last-push` setting.
+
+```
+# HELP github_actions_workflow_active_repos Last reported total of active repositories in the monitored org
+# TYPE github_actions_workflow_active_repos gauge
+github_actions_workflow_active_repos 174
+```
+
 ### Last Refresh Timestamp
 
 Last timestamp in seconds where the exported managed to refresh the data. Usefull for detecting stale data.
