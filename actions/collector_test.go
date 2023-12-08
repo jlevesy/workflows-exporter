@@ -153,6 +153,15 @@ github_actions_workflow_last_refresh_duration_seconds 1
 github_actions_workflow_last_refresh_timestamp_seconds 1.697328e+09
 				`,
 		},
+		{
+			metricName:  "github_actions_workflow_active_repos",
+			mockOptions: defaultMockBehavior,
+			wantMetrics: `
+# HELP github_actions_workflow_active_repos Last reported total of active repositories in the monitored org
+# TYPE github_actions_workflow_active_repos gauge
+github_actions_workflow_active_repos 3
+				`,
+		},
 	} {
 		t.Run(testCase.metricName, func(t *testing.T) {
 			var (

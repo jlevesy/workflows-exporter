@@ -12,7 +12,7 @@ import (
 )
 
 type WorkflowUsageFetcher interface {
-	Fetch(ctx context.Context) (Usage, error)
+	Fetch(ctx context.Context) (*Usage, error)
 }
 
 type WorkflowUsage struct {
@@ -24,7 +24,10 @@ type WorkflowUsage struct {
 	BillableTime map[string]time.Duration
 }
 
-type Usage []WorkflowUsage
+type Usage struct {
+	ActiveRepos int64
+	Workflows   []WorkflowUsage
+}
 
 type OrgUsageFetcher struct {
 	gh     *github.Client
@@ -45,7 +48,7 @@ func NewOrgUsageFetcher(concurencyLimit int, maxLastPushed time.Duration, org st
 	}
 }
 
-func (f *OrgUsageFetcher) Fetch(ctx context.Context) (Usage, error) {
+func (f *OrgUsageFetcher) Fetch(ctx context.Context) (*Usage, error) {
 	var (
 		usageMu sync.Mutex
 		usage   Usage
@@ -73,6 +76,9 @@ func (f *OrgUsageFetcher) Fetch(ctx context.Context) (Usage, error) {
 						totalInactive++
 						continue
 					}
+
+					// No mutex needed here, only one goroutine in writing this integer.
+					usage.ActiveRepos++
 
 					repo := repo
 
@@ -115,7 +121,7 @@ func (f *OrgUsageFetcher) Fetch(ctx context.Context) (Usage, error) {
 										}
 
 										usageMu.Lock()
-										usage = append(usage, result)
+										usage.Workflows = append(usage.Workflows, result)
 										usageMu.Unlock()
 
 										f.logger.Debug(
@@ -146,7 +152,7 @@ func (f *OrgUsageFetcher) Fetch(ctx context.Context) (Usage, error) {
 		)
 	})
 
-	return usage, group.Wait()
+	return &usage, group.Wait()
 }
 
 func scanAllRepoWorkflows(ctx context.Context, org, repo string, workflowClient *github.ActionsService, cb func(*github.Workflows)) error {

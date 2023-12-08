@@ -65,11 +65,13 @@ func run() int {
 		return 1
 	}
 
-	sort.Slice(usage, func(i, j int) bool {
-		return usage[i].Repo < usage[j].Repo
+	sort.Slice(usage.Workflows, func(i, j int) bool {
+		return usage.Workflows[i].Repo < usage.Workflows[j].Repo
 	})
 
-	for _, workflowUsage := range usage {
+	logger.Info("Reporting stats", zap.Int64("active repos", usage.ActiveRepos))
+
+	for _, workflowUsage := range usage.Workflows {
 		logger.Info(
 			"Got usage stats",
 			zap.String("owner", workflowUsage.Owner),

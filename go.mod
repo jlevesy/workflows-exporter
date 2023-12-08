@@ -33,3 +33,6 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// Until https://github.com/gofri/go-github-ratelimit/pull/18 lands.
+replace github.com/gofri/go-github-ratelimit => github.com/zendesk-piotrpawluk/go-github-ratelimit v0.0.0-20231120163947-01b70bdcdf9a
