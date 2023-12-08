@@ -30,6 +30,7 @@ type UsageCollector struct {
 	billableTimeDesc        *prometheus.Desc
 	lastRefreshTimeDesc     *prometheus.Desc
 	lastRefreshDurationDesc *prometheus.Desc
+	activeReposDesc         *prometheus.Desc
 
 	refreshTicker *time.Ticker
 	cancelFunc    func()
@@ -39,7 +40,7 @@ type UsageCollector struct {
 	ready chan struct{}
 
 	lastUsageDataMu     sync.RWMutex
-	lastUsageData       Usage
+	lastUsageData       *Usage
 	lastRefreshTime     time.Time
 	lastRefreshDuration time.Duration
 
@@ -78,6 +79,12 @@ func NewUsageCollector(usagefetcher WorkflowUsageFetcher, logger *zap.Logger, re
 			nil,
 			nil,
 		),
+		activeReposDesc: prometheus.NewDesc(
+			"github_actions_workflow_active_repos",
+			"Last reported total of active repositories in the monitored org",
+			nil,
+			nil,
+		),
 	}
 
 	for _, opt := range opts {
@@ -105,25 +112,34 @@ func (c *UsageCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.billableTimeDesc
 	ch <- c.lastRefreshTimeDesc
 	ch <- c.lastRefreshDurationDesc
+	ch <- c.activeReposDesc
 }
 
 func (c *UsageCollector) Collect(ch chan<- prometheus.Metric) {
 	c.lastUsageDataMu.RLock()
 	defer c.lastUsageDataMu.RUnlock()
 
-	for _, workflowData := range c.lastUsageData {
-		for platform, value := range workflowData.BillableTime {
-			ch <- prometheus.MustNewConstMetric(
-				c.billableTimeDesc,
-				prometheus.GaugeValue,
-				value.Seconds(),
-				workflowData.Owner,
-				workflowData.Repo,
-				workflowData.Workflow,
-				strconv.FormatInt(workflowData.ID, 10),
-				platform,
-			)
+	if c.lastUsageData != nil {
+		for _, workflowData := range c.lastUsageData.Workflows {
+			for platform, value := range workflowData.BillableTime {
+				ch <- prometheus.MustNewConstMetric(
+					c.billableTimeDesc,
+					prometheus.GaugeValue,
+					value.Seconds(),
+					workflowData.Owner,
+					workflowData.Repo,
+					workflowData.Workflow,
+					strconv.FormatInt(workflowData.ID, 10),
+					platform,
+				)
+			}
 		}
+
+		ch <- prometheus.MustNewConstMetric(
+			c.activeReposDesc,
+			prometheus.GaugeValue,
+			float64(c.lastUsageData.ActiveRepos),
+		)
 	}
 
 	if !c.lastRefreshTime.IsZero() {
