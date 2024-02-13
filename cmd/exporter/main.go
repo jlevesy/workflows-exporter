@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,6 +28,7 @@ func run() int {
 		githubAuthToken string
 		organization    string
 		concurencyLimit int
+		enablePprof     bool
 		maxLastPushed   time.Duration
 		refreshPeriod   time.Duration
 		shutdownDelay   time.Duration
@@ -38,6 +40,7 @@ func run() int {
 	flag.DurationVar(&maxLastPushed, "max-last-pushed", 35*24*time.Hour, "How many time since the last push to consider a repo inactive")
 	flag.DurationVar(&refreshPeriod, "refresh-period", 30*time.Minute, "Frequency at which usage data is refreshed")
 	flag.DurationVar(&shutdownDelay, "shutdown-delay", 15*time.Second, "Graceful shutdown delay")
+	flag.BoolVar(&enablePprof, "pprof", false, "Enable pprof endpoints")
 	flag.StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
 	flag.Parse()
 
@@ -50,6 +53,7 @@ func run() int {
 		zap.Duration("max_last_pushed", maxLastPushed),
 		zap.Duration("refresh_period", refreshPeriod),
 		zap.String("listen_address", listenAddress),
+		zap.Bool("pprof", enablePprof),
 	)
 
 	if githubAuthToken == "" {
@@ -94,6 +98,14 @@ func run() int {
 
 	// Expose /metrics HTTP endpoint using the created custom registry.
 	mux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+
+	if enablePprof {
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	}
 
 	go func() {
 		<-ctx.Done()

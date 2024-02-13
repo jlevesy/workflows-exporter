@@ -88,6 +88,8 @@ Here's the currently supported options
     How many time since the last push to consider a repo inactive (default 840h0m0s)
 -organization string
     Organization to monitor
+-pprof
+    Enable pprof endpoints
 -refresh-period duration
     Frequency at which usage data is refreshed (default 30m0s)
 -shutdown-delay duration
