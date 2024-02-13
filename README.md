@@ -78,8 +78,6 @@ go run ./cmd/exporter -help
 Here's the currently supported options
 
 ```
--concurency int
-    How many requests are allowed in parallel (default 100)
 -github-auth-token string
     GitHub auth token
 -listen-address string
@@ -97,4 +95,3 @@ Here's the currently supported options
 ```
 
 The exporter reads the auth token either from the -github-auth-token flag or the `GITHUB_TOKEN` environment variable.
-

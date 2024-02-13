@@ -168,7 +168,6 @@ github_actions_workflow_active_repos 3
 				logger  = zaptest.NewLogger(t)
 				gh      = github.NewClient(mock.NewMockedHTTPClient(testCase.mockOptions...))
 				fetcher = actions.NewOrgUsageFetcher(
-					100,
 					24*time.Hour,
 					"totocorp",
 					gh,

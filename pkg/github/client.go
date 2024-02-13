@@ -22,7 +22,8 @@ func NewClient(ctx context.Context, token string, logger *zap.Logger) (*github.C
 			func(ctx *github_ratelimit.CallbackContext) {
 				logger.Error(
 					"Detected ratelimit, all calls are currently held",
-					zap.Any("context", ctx),
+					zap.Any("sleep-until", ctx.SleepUntil),
+					zap.Any("total-sleep-time", ctx.TotalSleepTime),
 				)
 			},
 		),

@@ -20,13 +20,11 @@ func run() int {
 	var (
 		githubAuthToken string
 		organization    string
-		concurencyLimit int
 		maxLastPushed   time.Duration
 	)
 
 	flag.StringVar(&githubAuthToken, "github-auth-token", "", "GitHub auth token")
 	flag.StringVar(&organization, "organization", "", "organization")
-	flag.IntVar(&concurencyLimit, "concurency", 100, "How many request are allowed in parallel")
 	flag.DurationVar(&maxLastPushed, "max-last-pushed", 30*24*time.Hour, "How many time since the last push to consider a repo inactive")
 	flag.Parse()
 
@@ -47,7 +45,6 @@ func run() int {
 	}
 
 	fetcher := actions.NewOrgUsageFetcher(
-		concurencyLimit,
 		maxLastPushed,
 		organization,
 		gh,

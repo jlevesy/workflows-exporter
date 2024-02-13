@@ -33,18 +33,16 @@ type OrgUsageFetcher struct {
 	gh     *github.Client
 	logger *zap.Logger
 
-	concurencyLimit int
-	maxLastPushed   time.Duration
-	org             string
+	maxLastPushed time.Duration
+	org           string
 }
 
-func NewOrgUsageFetcher(concurencyLimit int, maxLastPushed time.Duration, org string, gh *github.Client, logger *zap.Logger) *OrgUsageFetcher {
+func NewOrgUsageFetcher(maxLastPushed time.Duration, org string, gh *github.Client, logger *zap.Logger) *OrgUsageFetcher {
 	return &OrgUsageFetcher{
-		concurencyLimit: concurencyLimit,
-		maxLastPushed:   maxLastPushed,
-		org:             org,
-		gh:              gh,
-		logger:          logger,
+		maxLastPushed: maxLastPushed,
+		org:           org,
+		gh:            gh,
+		logger:        logger,
 	}
 }
 
@@ -55,8 +53,6 @@ func (f *OrgUsageFetcher) Fetch(ctx context.Context) (*Usage, error) {
 
 		group, groupCtx = errgroup.WithContext(ctx)
 	)
-
-	group.SetLimit(f.concurencyLimit)
 
 	group.Go(func() error {
 		return scanAllOrgRepos(
